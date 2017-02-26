@@ -60,7 +60,7 @@ int main(void)
     struct sockaddr_storage remoteaddr; // client address
     socklen_t addrlen;
 
-    char buf[256];    // buffer for client data
+    char buf[8192];    // buffer for client data
     int nbytes;
 
     char remoteIP[INET6_ADDRSTRLEN];
@@ -165,8 +165,21 @@ int main(void)
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
                     } else {
+                      printf("start buff");
+                      int fd_in = open(buf, O_RDONLY);
+                      char e_buf[8192];
+                      if(fd_in < 0) {
+                    		printf("Failed to open the file\n");
+                    		// return 0;
+                    	}
+                      int readRet = read(fd_in,e_buf,8192);
+                      // Request *request = parse(e_buf,readRet,fd_in);
+                      printf("end buff");
+
                       if (send(i, buf, nbytes, 0) == -1) {
                           perror("send");
+                      } else {
+                        printf("hiihadup");
                       }
                     }
                 } // END handle data from client
