@@ -31,8 +31,8 @@ lisod: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 echo_client:
-	@gcc echo_client.c -o echo_client -Wall -Werror
+	@gcc echo_client.c logger.c -o echo_client -Wall -Werror
 
 clean:
-	@rm -f lisod echo_client
+	@rm -f lisod echo_client logfile.txt
 	@rm -f *~ *.o example lex.yy.c y.tab.c y.tab.h
