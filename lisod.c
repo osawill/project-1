@@ -49,6 +49,40 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+char * head_request(Request * request) {
+
+  char * e_buf = (char*) malloc(8192);
+  if( access( request->http_uri, F_OK ) != -1 ) {
+      // file exists
+      printf("yep");
+  } else {
+      // file doesn't exist
+      printf("nope");
+  }
+
+  strcpy(e_buf,"test");
+
+  return e_buf;
+}
+
+char * get_request(Request * request) {
+
+  char * e_buf = (char*) malloc(8192);
+
+  head_request(request);
+
+  return e_buf;
+}
+
+char * post_request(Request * request) {
+
+  char * e_buf = (char*) malloc(8192);
+
+  head_request(request);
+
+  return e_buf;
+}
+
 int main(void)
 {
     fd_set master;    // master file descriptor list
@@ -165,22 +199,42 @@ int main(void)
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
                     } else {
-                      printf("start buff");
-                      int fd_in = open(buf, O_RDONLY);
-                      char e_buf[8192];
-                      if(fd_in < 0) {
-                    		printf("Failed to open the file\n");
-                    		// return 0;
-                    	}
-                      int readRet = read(fd_in,e_buf,8192);
-                      // Request *request = parse(e_buf,readRet,fd_in);
-                      printf("end buff");
 
-                      if (send(i, buf, nbytes, 0) == -1) {
+                      // Parse the request
+                      Request * request = parse(buf,sizeof(buf),i);
+
+                      char * send_buf;
+
+                      // // GET request
+                      // if (strcmp(request->http_method, "GET") == 0) {
+                      //   // printf("GET request");
+                      //   send_buf = get_request(request);
+                      // }
+                      //
+                      // // HEAD request
+                      // else if (strcmp(request->http_method, "HEAD") == 0) {
+                      //   printf("Head request");
+                      //   send_buf = head_request(request);
+                      // }
+                      //
+                      // // POST request
+                      // else if (strcmp(request->http_method, "POST") == 0) {
+                      //   // printf("Post request");
+                      //   send_buf = post_request(request);
+                      // }
+
+                      // Prepare the buffer
+                      // strcpy(buf, "hello");
+
+                      send_buf = malloc(100);
+                      strcpy(send_buf, "hello");
+
+                      if (send(i, send_buf, strlen(send_buf), 0) == -1) {
                           perror("send");
                       } else {
-                        printf("hiihadup");
+                        printf(buf);
                       }
+                      free(send_buf);
                     }
                 } // END handle data from client
             } // END got new incoming connection
