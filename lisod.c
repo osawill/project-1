@@ -201,9 +201,11 @@ int main(void)
                     } else {
 
                       // Parse the request
-                      Request * request = parse(buf,sizeof(buf),i);
+                      Request * request = parse(buf, sizeof(buf), i);
 
-                      char * send_buf;
+                      char * send_buf = malloc(100);
+
+
 
                       // // GET request
                       // if (strcmp(request->http_method, "GET") == 0) {
@@ -226,8 +228,8 @@ int main(void)
                       // Prepare the buffer
                       // strcpy(buf, "hello");
 
-                      send_buf = malloc(100);
-                      strcpy(send_buf, "hello");
+                      printf("penis");
+                      strcpy(send_buf, "hello\n");
 
                       if (send(i, send_buf, strlen(send_buf), 0) == -1) {
                           perror("send");
