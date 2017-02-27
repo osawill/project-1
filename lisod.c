@@ -302,6 +302,8 @@ int main(void)
                       }
 
                       // POST request
+                      // CHARLIE: DETERMINE IF GET/HEAD before parsing. Can't parse the POST
+                      // BEFORE POST. 
                       else if (strcmp(request->http_method, "POST") == 0) {
                         // printf("Post request");
                         post_request(request, send_buf);
