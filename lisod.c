@@ -39,6 +39,8 @@
 
 #define PORT "9034"   // port we're listening on
 
+char buffr[10000];
+
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -49,9 +51,9 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-char * head_request(Request * request) {
+void head_request(Request * request, char * e_buf) {
 
-  char * e_buf = (char*) malloc(8192);
+  // char * e_buf = (char*) malloc(60);
   if( access( request->http_uri, F_OK ) != -1 ) {
       // file exists
       printf("yep");
@@ -59,28 +61,25 @@ char * head_request(Request * request) {
       // file doesn't exist
       printf("nope");
   }
-
-  strcpy(e_buf,"test");
-
-  return e_buf;
+  strcpy(e_buf,"test\r\n");
 }
 
-char * get_request(Request * request) {
+char * get_request(Request * request, char * e_buf) {
 
-  char * e_buf = (char*) malloc(8192);
+  // char * e_buf = (char*) malloc(60);
 
-  head_request(request);
+  // head_request(request);
 
-  return e_buf;
+  strcpy(e_buf,"test\r\n");
 }
 
-char * post_request(Request * request) {
+char * post_request(Request * request, char * e_buf) {
 
-  char * e_buf = (char*) malloc(8192);
+  // char * e_buf = (char*) malloc(8192);
 
-  head_request(request);
+  // head_request(request);
 
-  return e_buf;
+  strcpy(e_buf,"test\r\n");
 }
 
 int main(void)
@@ -207,29 +206,27 @@ int main(void)
 
 
 
-                      // // GET request
-                      // if (strcmp(request->http_method, "GET") == 0) {
-                      //   // printf("GET request");
-                      //   send_buf = get_request(request);
-                      // }
+                      // GET request
+                      if (strcmp(request->http_method, "GET") == 0) {
+                        // printf("GET request");
+                        // send_buf = get_request(request);
+                        get_request(request, send_buf);
+                        printf(send_buf);
+                      }
                       //
-                      // // HEAD request
-                      // else if (strcmp(request->http_method, "HEAD") == 0) {
-                      //   printf("Head request");
-                      //   send_buf = head_request(request);
-                      // }
-                      //
-                      // // POST request
-                      // else if (strcmp(request->http_method, "POST") == 0) {
-                      //   // printf("Post request");
-                      //   send_buf = post_request(request);
-                      // }
+                      // HEAD request
+                      else if (strcmp(request->http_method, "HEAD") == 0) {
+                        printf("Head request");
+                        head_request(request, send_buf);
+                        printf(send_buf);
+                      }
 
-                      // Prepare the buffer
-                      // strcpy(buf, "hello");
+                      // POST request
+                      else if (strcmp(request->http_method, "POST") == 0) {
+                        // printf("Post request");
+                        post_request(request, send_buf);
+                      }
 
-                      printf("penis");
-                      strcpy(send_buf, "hello\n");
 
                       if (send(i, send_buf, strlen(send_buf), 0) == -1) {
                           perror("send");
