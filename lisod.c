@@ -36,10 +36,17 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "parse.h"
+#include <time.h>
 
 #define PORT "9034"   // port we're listening on
+#define ROOT_DIR "/www"
 
-char buffr[10000];
+// Get file extension
+const char *get_filename_ext(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -53,15 +60,88 @@ void *get_in_addr(struct sockaddr *sa)
 
 void head_request(Request * request, char * e_buf) {
 
+  char resp[10000];
+
   // char * e_buf = (char*) malloc(60);
   if( access( request->http_uri, F_OK ) != -1 ) {
       // file exists
-      printf("yep");
-  } else {
-      // file doesn't exist
-      printf("nope");
+      printf("FILE EXISTS");
+
+      // Server Version
+      strcpy(resp,"HTTP/1.1 200 OK\n");
+
+      // Server type
+      strcat(resp, "Server: lisod/1.0\n");
+
+      // Connection
+      strcat(resp, "Connection: keep-alive\r\n");
+
+      // Get file length
+      FILE * fp = fopen(request->http_uri, "rb");
+      int prev=ftell(fp);
+      fseek(fp, 0L, SEEK_END);
+      int sz=ftell(fp);
+      fseek(fp,prev,SEEK_SET);
+      char length[200];
+      sprintf(length, "%d", sz);
+      strcat(resp, "Content-length: ");
+      strcat(resp, length);
+      strcat(resp,"\n");
+
+      // Content type
+      char buff_CT[1000];
+
+      if (get_filename_ext(request->http_uri) == "html") {
+          strcpy(buff_CT, "text/html");
+      }
+      else if (get_filename_ext(request->http_uri) == "css") {
+          strcpy(buff_CT, "text/css");
+      }
+      else if (get_filename_ext(request->http_uri) == "png") {
+          strcpy(buff_CT, "image/png");
+      }
+      else if (get_filename_ext(request->http_uri) == "jpeg") {
+          strcpy(buff_CT, "image/jpeg");
+      }
+      else if (get_filename_ext(request->http_uri) == "gif") {
+          strcpy(buff_CT, "image/gif");
+      }
+      else if (get_filename_ext(request->http_uri) == "txt") {
+          strcpy(buff_CT, "text/plain");
+      }
+      else { // default
+          strcpy(buff_CT, "application/octet-stream");
+      }
+
+      strcat(resp, "Content-Type: ");
+      strcat(resp, buff_CT);
+      strcat(resp,"\n");
+
+      // Get Date
+      char buf_t[500];
+      time_t now = time(0);
+      struct tm tm = *gmtime(&now);
+      strftime(buf_t, sizeof buf_t, "%a, %d %b %Y %H:%M:%S %Z", &tm);
+      strcat(resp, "Date: ");
+      strcat(resp, buf_t);
+      strcat(resp, "\n");
+
+      // Get Last date modified of file
+      struct stat attr;
+      stat(request->http_uri, &attr);
+      char buf_LM[500];
+      // NEED TO FORMAT THIS STRING LIKE ABOVE ONE
+      // sprintf(buf_LM, "%a, %d %b %Y %H:%M:%S %Z", ctime(&attr.st_mtime));
+      strcat(resp, "Last-Modified: ");
+      strcat(resp, ctime(&attr.st_mtime));
+      strcat(resp, "\n");
+
+  } else { // File doesn't exist: Respond with an error
+      printf("FILE DOES NOT EXIST");
   }
-  strcpy(e_buf,"test\r\n");
+
+  strcat(resp, "\r\n");
+  strcpy(e_buf, resp);
 }
 
 char * get_request(Request * request, char * e_buf) {
@@ -202,14 +282,13 @@ int main(void)
                       // Parse the request
                       Request * request = parse(buf, sizeof(buf), i);
 
-                      char * send_buf = malloc(100);
+                      char * send_buf = malloc(10000);
 
 
 
                       // GET request
                       if (strcmp(request->http_method, "GET") == 0) {
-                        // printf("GET request");
-                        // send_buf = get_request(request);
+                        printf("GET request");
                         get_request(request, send_buf);
                         printf(send_buf);
                       }
@@ -223,7 +302,7 @@ int main(void)
 
                       // POST request
                       else if (strcmp(request->http_method, "POST") == 0) {
-                        // printf("Post request");
+                        printf("Post request");
                         post_request(request, send_buf);
                       }
 
