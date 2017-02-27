@@ -144,7 +144,7 @@ void head_request(Request * request, char * e_buf) {
   strcpy(e_buf, resp);
 }
 
-char * get_request(Request * request, char * e_buf) {
+void get_request(Request * request, char * e_buf) {
 
   // char * e_buf = (char*) malloc(60);
 
@@ -153,13 +153,16 @@ char * get_request(Request * request, char * e_buf) {
   strcpy(e_buf,"test\r\n");
 }
 
-char * post_request(Request * request, char * e_buf) {
+void post_request(Request * request, char * e_buf) {
 
-  // char * e_buf = (char*) malloc(8192);
+  char respPOST[10000];
 
-  // head_request(request);
+  // Server Version
+  strcpy(respPOST,"HTTP/1.1 200 OK\n");
+  printf(respPOST);
 
-  strcpy(e_buf,"test\r\n");
+  strcat(respPOST, "\r\n");
+  strcpy(e_buf, respPOST);
 }
 
 int main(void)
@@ -284,25 +287,23 @@ int main(void)
 
                       char * send_buf = malloc(10000);
 
-
-
                       // GET request
                       if (strcmp(request->http_method, "GET") == 0) {
                         printf("GET request");
                         get_request(request, send_buf);
                         printf(send_buf);
                       }
-                      //
+
                       // HEAD request
                       else if (strcmp(request->http_method, "HEAD") == 0) {
-                        printf("Head request");
+                        // printf("Head request");
                         head_request(request, send_buf);
                         printf(send_buf);
                       }
 
                       // POST request
                       else if (strcmp(request->http_method, "POST") == 0) {
-                        printf("Post request");
+                        // printf("Post request");
                         post_request(request, send_buf);
                       }
 
