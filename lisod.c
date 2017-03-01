@@ -159,8 +159,7 @@ void head_request(Request * request, char * e_buf) {
 		// strcat(resp, "\n");
 
 	} else { // File doesn't exist: Respond with an error
-    printf("file doesn't exist");
-    strcpy(resp, "ERROR 4"); // ERROR 404
+    strcpy(resp, "HTTP/1.1 404 Not Found"); // ERROR 404
 	}
 
 	strcat(resp, "\r\n");
@@ -198,8 +197,8 @@ void get_request(Request * request, char * e_buf, int sock) {
 			write (sock, buffer, bytes_read);
     write(sock, buffer, bytes_read + 2);
 	}
-	else
-    write(sock, "HTTP/1.0 404 Not Found\n", 23); //FILE NOT FOUND
+	// else
+  //   write(sock, "HTTP/1.0 404 Not Found\n", 23); //FILE NOT FOUND
 
 
 }
