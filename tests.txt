@@ -11,3 +11,6 @@ and
 to ensure an accurate GET response on a file that actually exists,
 as well as similar requests on file's that did not exist in order to check the validity of our server's
 appropriate use for 404 responses.
+
+To test POST requests, we used variations of the command:
+`curl -i -F dataname=dataval localhost:9034/test.txt`
