@@ -59,6 +59,13 @@ void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+// Check for file existence
+int file_exist (char *filename)
+{
+  struct stat   buffer;
+  return (stat (filename, &buffer) == 0);
+}
+
 void head_request(Request * request, char * e_buf) {
 
 	char resp[10000];
@@ -66,7 +73,14 @@ void head_request(Request * request, char * e_buf) {
 //	strcpy(filePath, ROOT_DIR);
 //	strcat(filePath, request->http_uri);
 	// char * e_buf = (char*) malloc(60);
-	if( access( request->http_uri, F_OK ) != -1 ) {
+
+  char file_name[1000]; //Adding room for root directory
+	strcat(file_name, "www");
+	strcat(file_name, request->http_uri);
+  printf("%s", file_name);
+
+  printf("hi");
+	if( file_exist(file_name)) {
 		// file exists
 		printf("FILE EXISTS");
 
@@ -80,7 +94,7 @@ void head_request(Request * request, char * e_buf) {
 		strcat(resp, "Connection: keep-alive\r\n");
 
 		// Get file length
-		FILE * fp = fopen(request->http_uri, "rb");
+		FILE * fp = fopen(file_name, "rb");
 		int prev=ftell(fp);
 		fseek(fp, 0L, SEEK_END);
 		int sz=ftell(fp);
@@ -132,16 +146,21 @@ void head_request(Request * request, char * e_buf) {
 
 		// Get Last date modified of file
 		struct stat attr;
-		stat(request->http_uri, &attr);
+		stat(file_name, &attr);
 		//char buf_LM[500];
 		// NEED TO FORMAT THIS STRING LIKE ABOVE ONE
 		// sprintf(buf_LM, "%a, %d %b %Y %H:%M:%S %Z", ctime(&attr.st_mtime));
+    char tempTime[50];
+    //struct tm *tm;
 		strcat(resp, "Last-Modified: ");
-		strcat(resp, ctime(&attr.st_mtime));
-		strcat(resp, "\n");
+    gmtime_r(&attr.st_mtime, &tm);
+    strftime(tempTime, sizeof(tempTime), "%a, %d %b %Y %H:%M:%S %Z\n", &tm);
+		strcat(resp, tempTime);
+		// strcat(resp, "\n");
 
 	} else { // File doesn't exist: Respond with an error
-		strcpy(resp, ""); // ERROR 404
+    printf("file doesn't exist");
+    strcpy(resp, "ERROR 4"); // ERROR 404
 	}
 
 	strcat(resp, "\r\n");
@@ -164,17 +183,23 @@ void get_request(Request * request, char * e_buf, int sock) {
 	char * file_name = (char *)malloc(strlen(request->http_uri) + 5); //Adding room for root directory
 	strcpy(file_name, ROOT_DIR);
 	strcat(file_name, request->http_uri);
+  printf("Hello\n");
+  if( access( file_name, F_OK ) != -1 ) {
+    printf("Found file");
+  }
 
 	int fl;
 	if ( (fl = open(file_name, O_RDONLY))!=-1 )    //FILE FOUND
 	{
 		int bytes_read;
-		char buffer[BUF_SIZE];
+		char buffer[BUF_SIZE+1];
 		//send(sock, "HTTP/1.0 200 OK\n\n", 17, 0);
-		while ( (bytes_read=read(fl, buffer, BUF_SIZE))>0 )
+		while ( (bytes_read=read(fl, buffer, BUF_SIZE))>= BUF_SIZE )
 			write (sock, buffer, bytes_read);
+    write(sock, buffer, bytes_read + 2);
 	}
-	else    write(sock, "HTTP/1.0 404 Not Found\n", 23); //FILE NOT FOUND
+	else
+    write(sock, "HTTP/1.0 404 Not Found\n", 23); //FILE NOT FOUND
 
 
 }
@@ -308,38 +333,47 @@ int main(void)
 						FD_CLR(i, &master); // remove from master set
 					} else {
 
-						// Parse the request
-						Request * request = parse(buf, sizeof(buf), i);
+            char * send_buf = malloc(10000);
 
-						char * send_buf = malloc(10000);
+            // If not HEAD, GET, or POST
+            if (strncmp(buf, "HEAD", 4) != 0 && strncmp(buf, "GET", 3) != 0 && strncmp(buf, "POST", 4) != 0) {
+              strcpy(send_buf, "501 Method Unimplemented");
+            }
+
+            // Else, if a GET, HEAD, or POST
+            else {
+
+  						// Parse the request
+  						Request * request = parse(buf, sizeof(buf), i);
 
 
+  						// HEAD request
+  						if ((strcmp(request->http_method, "HEAD") == 0 || strcmp(request->http_method, "GET") == 0)) {
+  						// printf("Head request");
+  						head_request(request, send_buf);
+  						printf("%s", send_buf);
+  						}
 
-						// HEAD request
-						if ((strcmp(request->http_method, "HEAD") == 0) || (strcmp(request->http_method, "GET") == 0)) {
-						// printf("Head request");
-						head_request(request, send_buf);
-						printf("%s", send_buf);
-						}
-
-						// POST request
-						// CHARLIE: DETERMINE IF GET/HEAD before parsing. Can't parse the POST
-						// BEFORE POST.
-						else if (strcmp(request->http_method, "POST") == 0) {
-						// printf("Post request");
-						post_request(request, send_buf);
-						}
+  						// POST request
+  						// CHARLIE: DETERMINE IF GET/HEAD before parsing. Can't parse the POST
+  						// BEFORE POST.
+  						else if (strcmp(request->http_method, "POST") == 0) {
+  						// printf("Post request");
+  						post_request(request, send_buf);
+  						}
+            }
 
 
 						if (send(i, send_buf, strlen(send_buf), 0) == -1) {
 							perror("send");
 						} else {
-						//printf("%s", buf);
+
 							//	 GET request
-							if (strcmp(request->http_method, "GET") == 0) {
-							printf("GET request");
-							get_request(request, send_buf, i);
-							printf("%s", send_buf);
+							if (strncmp(buf, "GET", 3) == 0) {
+  							printf("GET request");
+                Request * request = parse(buf, sizeof(buf), i);
+  							get_request(request, send_buf, i);
+  							printf("%s", send_buf);
 							}
 						}
 						free(send_buf);
