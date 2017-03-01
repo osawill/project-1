@@ -182,16 +182,28 @@ void get_request(Request * request, char * e_buf, int sock) {
 }
 
 // Make a POST request
-void post_request(Request * request, char * e_buf) {
+void post_request(Request * request, char * e_buf, int sock) {
 
 	char respPOST[10000];
 
-	// Server Version
-	strcpy(respPOST,"HTTP/1.1 200 OK\n");
-	printf("%s", respPOST);
 
-	strcat(respPOST, "\r\n");
-	strcpy(e_buf, respPOST);
+  char * file_name = (char *)malloc(strlen(request->http_uri) + 5); //Adding room for root directory
+  strcpy(file_name, ROOT_DIR);
+  strcat(file_name, request->http_uri);
+
+  if( access( file_name, F_OK ) != -1 ) {
+    // Continue
+  	strcpy(respPOST,"HTTP/1.1 100\n");
+    write(sock,respPOST, sizeof(respPOST));
+    char temp[100];
+    recv(sock, temp, sizeof(temp), 0);
+    strcpy(respPOST,"HTTP/1.1 200 OK\r\n");
+  	strcpy(e_buf, respPOST);
+  }
+  else {
+    strcpy(respPOST,"HTTP/1.1 404 Not Found\r\n");
+  	strcpy(e_buf, respPOST);
+  }
 }
 
 // Used BEEJ's guide as a resource for checkpoint 1
@@ -334,7 +346,7 @@ int main(void)
   						// POST request
   						else if (strcmp(request->http_method, "POST") == 0) {
 					        // printf("Post request");
-						      post_request(request, send_buf);
+						      post_request(request, send_buf, i);
   						}
             }
 

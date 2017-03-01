@@ -1,0 +1,13 @@
+For checkpoint 1, we primarily used `telnet` to test the functionality of our simple echo server with multiple
+concurrent clients.
+
+For the remainder of the assignment, when implementing HEAD, GET, and POST requests, we mainly used `curl` to test
+the accuracy of our server's responses.
+
+Using `curl`, we did requests such as:
+`curl -i localhost:9034/test.txt`
+and
+`curl -I localhost:9034/test.txt`
+to ensure an accurate GET response on a file that actually exists,
+as well as similar requests on file's that did not exist in order to check the validity of our server's
+appropriate use for 404 responses.
