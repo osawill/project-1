@@ -12,10 +12,10 @@ To run the server, from the root directory:
 The server is now running on localhost port 9034!
 
 To make a HEAD request to the server, run:
-`curl -i localhost:9034/test.txt`
+`curl -I localhost:9034/test.txt`
 
 To make a HEAD request to the server, run:
-`curl -I localhost:9034/test/txt`
+`curl -i localhost:9034/test/txt`
 
 All requests made to the server are routed to the `www/` directory found at the
 root of this repository. For example, if a user made a GET request to localhost:9034/test.txt,
