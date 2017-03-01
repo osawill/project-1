@@ -5,11 +5,12 @@
 
 #include "logger.h"
 
+#define OUTPUT "./logfile.txt"
 FILE * fp;
 
 //Create/open text file
 void init() {
-	if ((fp = fopen("./logfile.txt","a")) == NULL){
+	if ((fp = fopen(OUTPUT,"a")) == NULL){
 	   perror("Error opening file: ");
    }
 };

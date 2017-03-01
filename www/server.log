@@ -1,0 +1,5 @@
+ INFO: http server starting:9000:1689
+ INFO: request:GET /test.txt HTTP/1.1**User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3**Host: localhost:9000**Accept: */*****:1
+SORRY: file extension type not supported:GET /test.txt
+ INFO: request:GET /test HTTP/1.1**User-Agent: curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3**Host: localhost:9000**Accept: */*****:2
+SORRY: file extension type not supported:GET /test
