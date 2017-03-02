@@ -8,7 +8,7 @@
 
 typedef struct {
   void (*const init) ();
-  void (*const write) (int level, char * body);
+  void (*const save) (int level, char * body);
   void (*const end) ();
 } Log_class;
 

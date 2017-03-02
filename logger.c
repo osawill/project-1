@@ -10,70 +10,70 @@ FILE * fp;
 
 //Create/open text file
 void init() {
-	if ((fp = fopen(OUTPUT,"a")) == NULL){
-	   perror("Error opening file: ");
+  if ((fp = fopen(OUTPUT,"a")) == NULL){
+     perror("Error opening file: ");
    }
 };
 
 //Close out text file
 void end() {
-	if(fclose(fp) != 0) {
-		perror("Error closing file: ");
-	}
+  if(fclose(fp) != 0) {
+    perror("Error closing file: ");
+  }
 };
 
 char * getTime() {
-	char * val =(char *)malloc(6);
-	time_t now = time(NULL);
-	struct tm *t = localtime(&now);
+  char * val =(char *)malloc(6);
+  time_t now = time(NULL);
+  struct tm *t = localtime(&now);
 
-	strftime(val, sizeof(val)-1, "%H:%M", t);
+  strftime(val, sizeof(val)-1, "%H:%M", t);
 
-	return val;
+  return val;
 };
 
-//Write to text file/print to console
-void write(int level, char * body) {
-	//Assign status level
-	char * status = (char*)malloc(10);
-	switch(level) {
-		case LOG_INFO:
-			strcpy(status, "[INFO]");
-			break;
-		case LOG_DEBUG:
-			strcpy(status, "[DEBUG]");
-			break;
-		case LOG_ALERT:
-			strcpy(status, "[ALERT]");
-			break;
-		case LOG_WARN:
-			strcpy(status, "[WARN!]");
-			break;
-	}
-	//Current time
-	char * time = getTime();
+//save to text file/print to console
+void save(int level, char * body) {
+  //Assign status level
+  char * status = (char*)malloc(10);
+  switch(level) {
+    case LOG_INFO:
+      strcpy(status, "[INFO]");
+      break;
+    case LOG_DEBUG:
+      strcpy(status, "[DEBUG]");
+      break;
+    case LOG_ALERT:
+      strcpy(status, "[ALERT]");
+      break;
+    case LOG_WARN:
+      strcpy(status, "[WARN!]");
+      break;
+  }
+  //Current time
+  char * time = getTime();
 
-	//Compile log entry
-	int strSize = strlen(body) + 25;
+  //Compile log entry
+  int strSize = strlen(body) + 25;
 
-	char * line = (char*)malloc(strSize);
-	sprintf(line, "%s%s - %s\r\n", status, time, body);
+  char * line = (char*)malloc(strSize);
+  sprintf(line, "%s%s - %s\r\n", status, time, body);
 
-	//Export line to console & file
-	fprintf(fp, "%s", line);
-	printf("%s", line);
+  //Export line to console & file
+  fprintf(fp, "%s", line);
+  printf("%s", line);
 
-	//Free the memory
-	free(status);
-	free(line);
-	free(time);
+  //Free the memory
+  free(status);
+  free(line);
+  free(time);
 };
 
-Log_class const Log = {init, write, end};
+Log_class const Log = {init, save, end};
 /*int main() {
-	Log.init();
-	Log.write(1, "We are good");
-	Log.end();
-	return 0;
+  Log.init();
+  Log.save(1, "We are good");
+  Log.end();
+  return 0;
 }*/
 

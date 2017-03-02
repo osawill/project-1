@@ -11,10 +11,10 @@
 CC=gcc
 CFLAGS=-I.
 DEPS = parse.h y.tab.h
-OBJ = y.tab.o lex.yy.o parse.o lisod.o
+OBJ = y.tab.o lex.yy.o parse.o lisod.o logger.o
 FLAGS = -g -Wall
 
-default: lisod echo_client all
+default: lisod
 
 all: lisod
 
